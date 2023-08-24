@@ -6,6 +6,6 @@ import com.example.githubviewerapp.domain.model.RepositoryDetails
 
 interface GithubRepository {
     suspend fun getRepositories(): List<Repository>
-    suspend fun getRepositoryDetails(): RepositoryDetails
+    suspend fun getRepositoryDetails(owner:String,repo:String): RepositoryDetails
     suspend fun getIssues(): List<Issue>
 }

@@ -17,4 +17,7 @@ interface RepositoryDao {
 
     @Query("SELECT * FROM repository_table LIMIT :pageSize OFFSET :offset")
     suspend fun getRepositories(offset: Int, pageSize: Int): List<RepositoryEntity>
+
+    @Query("DELETE FROM repository_table")
+    suspend fun deleteAllRepositories()
 }

@@ -19,17 +19,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.githubviewerapp.domain.model.Repository
+import com.example.githubviewerapp.ui.feature.details.navigateToDetailsScreen
+import com.example.githubviewerapp.ui.navigation.LocalNavigationProvider
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val navController = LocalNavigationProvider.current
     LaunchedEffect(key1 = true) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is HomeUiEffect.NavigateToRepositoryDetails -> {
+                    navController.navigateToDetailsScreen(effect.owner,effect.repositoryName)
                     Log.d("HomeScreen", "HomeScreen: NavigateToRepositoryDetails${effect.owner} ${effect.repositoryName}")
                 }
             }
@@ -44,13 +47,16 @@ fun HomeContent(
     state: HomeUiState,
     listener: HomeInteractionListener
 ) {
+    if (state.isLoading){
+        Text(text = "dsdsdsd")
+    }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
     ) {
         items(state.repositories.size) { index ->
             RepositoryItem(state.repositories[index], onClick = {
                 listener.onClickRepositoryItem(
-                    state.repositories[index].owner.name,
+                    state.repositories[index].user.userName,
                     state.repositories[index].name
                 )
             })
@@ -59,12 +65,12 @@ fun HomeContent(
 }
 
 @Composable
-fun RepositoryItem(repository: Repository, onClick: () -> Unit ) {
+fun RepositoryItem(repository: RepositoryUiModel, onClick: () -> Unit ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .clickable { onClick()},
+            .clickable { onClick() },
         elevation = 4.dp
     ) {
         Column(
@@ -83,7 +89,7 @@ fun RepositoryItem(repository: Repository, onClick: () -> Unit ) {
             )
             Spacer(modifier = Modifier.padding(8.dp))
             Text(
-                text = "Owner: ${repository.owner.name}",
+                text = "Owner: ${repository.user.userName}",
                 style = typography.caption,
                 color = MaterialTheme.colors.onBackground
             )

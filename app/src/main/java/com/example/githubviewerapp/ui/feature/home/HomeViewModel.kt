@@ -27,7 +27,12 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun onGetRepositoriesSuccess(repositories: List<Repository>) {
-        _state.update { it.copy(repositories = repositories, isLoading = false) }
+        _state.update { uiState ->
+            uiState.copy(
+                repositories = repositories.map { it.toUiModel() },
+                isLoading = false
+            )
+        }
     }
 
     private fun onGetRepositoriesError(error: String) {
@@ -36,7 +41,6 @@ class HomeViewModel @Inject constructor(
 
     override fun onClickRepositoryItem(owner: String, repositoryName: String) {
         effectActionExecutor(
-            _effect,
             HomeUiEffect.NavigateToRepositoryDetails(owner, repositoryName)
         )
     }

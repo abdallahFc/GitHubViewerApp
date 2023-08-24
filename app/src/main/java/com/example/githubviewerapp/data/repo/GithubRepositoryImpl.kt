@@ -1,15 +1,11 @@
 package com.example.githubviewerapp.data.repo
 
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import com.example.githubviewerapp.data.source.local.RepositoryDao
 import com.example.githubviewerapp.data.source.local.entities.RepositoryEntity
 import com.example.githubviewerapp.data.source.local.mapper.toRepository
 import com.example.githubviewerapp.data.source.local.mapper.toRepositoryEntity
 import com.example.githubviewerapp.data.source.remote.GithubApiService
 import com.example.githubviewerapp.data.source.remote.mapper.toIssue
-import com.example.githubviewerapp.data.source.remote.mapper.toRepository
 import com.example.githubviewerapp.data.source.remote.mapper.toRepositoryDetails
 import com.example.githubviewerapp.domain.model.Issue
 import com.example.githubviewerapp.domain.model.Repository
@@ -17,29 +13,44 @@ import com.example.githubviewerapp.domain.model.RepositoryDetails
 import com.example.githubviewerapp.domain.repo.GithubRepository
 import retrofit2.Response
 import java.io.IOException
-import java.util.concurrent.Flow
 import javax.inject.Inject
 
 class GithubRepositoryImpl @Inject constructor(
     private val githubApiService: GithubApiService,
     private val repositoryDao: RepositoryDao
 ) : GithubRepository {
+
     override suspend fun getRepositories(): List<Repository> {
-        val repositoriesFromDatabase = repositoryDao.getAllRepositories()
-        return if (repositoriesFromDatabase.isNotEmpty()) {
-            repositoriesFromDatabase.map { it.toRepository() }
-        } else {
-            val repositoriesFromApi = wrapResponseWithErrorHandler {
-                githubApiService.getRepositories()
-            }
-            repositoryDao.insertRepositories(repositoriesFromApi.map { it.toRepositoryEntity()})
-            repositoriesFromApi.map { it.toRepository() }
+        return try {
+            val repositoriesFromApi = fetchRepositoriesFromApi()
+            clearAndInsertRepositories(repositoriesFromApi)
+            retrieveRepositoriesFromDb()
+        } catch (exception: Exception) {
+            retrieveRepositoriesFromDb()
         }
     }
 
-    override suspend fun getRepositoryDetails(): RepositoryDetails {
+    private suspend fun fetchRepositoriesFromApi(): List<RepositoryEntity> {
         return wrapResponseWithErrorHandler {
-            githubApiService.getRepositoryDetails()
+            githubApiService.getRepositories()
+        }.map { it.toRepositoryEntity() }
+    }
+
+    private suspend fun clearAndInsertRepositories(repositories: List<RepositoryEntity>) {
+        repositoryDao.deleteAllRepositories()
+        repositoryDao.insertRepositories(repositories)
+    }
+
+    private suspend fun retrieveRepositoriesFromDb(): List<Repository> {
+        return repositoryDao.getAllRepositories().map { it.toRepository() }
+    }
+
+
+    override suspend fun getRepositoryDetails(owner: String, repo: String): RepositoryDetails {
+        return wrapResponseWithErrorHandler {
+            githubApiService.getRepositoryDetails(
+                owner, repo
+            )
         }.toRepositoryDetails()
     }
 

@@ -1,5 +1,6 @@
 package com.example.githubviewerapp.ui.base
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.githubviewerapp.data.repo.EmptyResponseException
@@ -29,6 +30,7 @@ abstract class BaseViewModel<T, E>(initialState: T) : ViewModel() {
     ) {
         viewModelScope.launch(dispatcher) {
             try {
+                Log.d("fdfdfdf","Sdsdsdssdsd")
                 val result = function()
                 onSuccess(result)
             } catch (exception: NetworkErrorException) {
@@ -43,9 +45,8 @@ abstract class BaseViewModel<T, E>(initialState: T) : ViewModel() {
         }
 
     }
-    protected fun <T : BaseUiEffect> effectActionExecutor(
-        _effect: MutableSharedFlow<T>,
-        effect: T,
+    protected fun effectActionExecutor(
+        effect: E,
     ) {
         viewModelScope.launch {
             _effect.emit(effect)
