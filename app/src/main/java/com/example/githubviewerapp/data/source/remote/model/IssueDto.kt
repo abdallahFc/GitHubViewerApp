@@ -23,5 +23,5 @@ data class IssueDto(
     val title: String?,
     @SerializedName("updated_at") val updatedAt: String?,
     val url: String?,
-    val userDto: UserDto?
+    val user: OwnerDto?
 )

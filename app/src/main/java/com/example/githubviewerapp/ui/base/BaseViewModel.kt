@@ -1,12 +1,12 @@
 package com.example.githubviewerapp.ui.base
 
-import android.util.Log
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.githubviewerapp.data.repo.EmptyResponseException
-import com.example.githubviewerapp.data.repo.NetworkErrorException
-import com.example.githubviewerapp.data.repo.ServerErrorException
-import com.example.githubviewerapp.data.repo.UnknownErrorException
+import com.example.githubviewerapp.domain.util.EmptyResponseException
+import com.example.githubviewerapp.domain.util.NetworkErrorException
+import com.example.githubviewerapp.domain.util.ServerErrorException
+import com.example.githubviewerapp.domain.util.UnknownErrorException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,22 +25,21 @@ abstract class BaseViewModel<T, E>(initialState: T) : ViewModel() {
     protected fun <T> tryToExecute(
         function: suspend () -> T,
         onSuccess: (T) -> Unit,
-        onError: (t: String) -> Unit,
+        onError: (t: ErrorHandler) -> Unit,
         dispatcher: CoroutineDispatcher = Dispatchers.IO,
     ) {
         viewModelScope.launch(dispatcher) {
             try {
-                Log.d("fdfdfdf","Sdsdsdssdsd")
                 val result = function()
                 onSuccess(result)
             } catch (exception: NetworkErrorException) {
-                onError(exception.message ?: "Error")
+                onError(ErrorHandler.NetworkError(exception.message.toString()))
             } catch (exception: EmptyResponseException) {
-                onError(exception.message ?: "Error")
+                onError(ErrorHandler.EmptyResponse(exception.message.toString()))
             } catch (exception: ServerErrorException) {
-                onError(exception.message ?: "Error")
+                onError(ErrorHandler.ServerError(exception.message.toString()))
             } catch (exception: UnknownErrorException) {
-                onError(exception.message ?: "Error")
+                onError(ErrorHandler.UnknownError(exception.message.toString()))
             }
         }
 

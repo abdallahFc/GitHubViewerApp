@@ -1,7 +1,5 @@
 package com.example.githubviewerapp.domain.model
 
-import com.example.githubviewerapp.domain.model.User
-
 data class RepositoryDetails(
     val id: String,
     val name: String,

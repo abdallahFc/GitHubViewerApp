@@ -38,3 +38,4 @@ class DetailsArgs(savedStateHandle: SavedStateHandle) {
         const val REPO_NAME = "repoName"
     }
 }
+

@@ -28,4 +28,5 @@ object DatabaseModule {
     fun provideUserDao(database: GithubDataBase): RepositoryDao {
         return database.repositoryDao
     }
+
 }

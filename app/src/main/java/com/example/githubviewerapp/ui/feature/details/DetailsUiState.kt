@@ -1,15 +1,18 @@
 package com.example.githubviewerapp.ui.feature.details
 
 import com.example.githubviewerapp.domain.model.RepositoryDetails
+import com.example.githubviewerapp.ui.base.ErrorHandler
 import com.example.githubviewerapp.ui.feature.home.UserUiModel
 import com.example.githubviewerapp.ui.feature.home.toUiModel
+import convertDateFormat
 
 data class DetailsUiState(
     val item: RepositoryDetailsUiModel= RepositoryDetailsUiModel(),
     val owner:String="",
     val repoName:String="",
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: ErrorHandler? = null,
+    val isError:Boolean=false
 )
 data class RepositoryDetailsUiModel(
     val id: String = "",
@@ -35,7 +38,9 @@ fun RepositoryDetails.toUiModel() = RepositoryDetailsUiModel(
     forksCount = forksCount,
     openIssuesCount = openIssuesCount,
     subscribersCount = subscribersCount,
-    createdAt = createdAt,
+    createdAt = createdAt.convertDateFormat(),
     owner = owner.toUiModel()
 )
+
+fun DetailsUiState.contentScreen()= !this.isLoading && !this.isError
 

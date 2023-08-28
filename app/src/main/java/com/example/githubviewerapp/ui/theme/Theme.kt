@@ -1,67 +1,78 @@
 package com.example.githubviewerapp.ui.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = DarkPrimaryTextColor,
+    secondary = DarkSecondaryTextColor,
+    tertiary = Pink80,
+    background = DarkBackgroundColor,
+    surface = DarkCardColor,
+    error = Color.Red,
+    onPrimary = Color.White,
+    onSecondary = DarkSmallTextColor,
+    onBackground = DarkPrimaryTextColor,
+    onSurface = DarkPrimaryTextColor,
+    onError = Color.White
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = LightPrimaryTextColor,
+    secondary = LightSecondaryTextColor,
+    tertiary = Pink40,
+    background = LightBackgroundColor,
+    surface = LightCardColor,
+    error = Color.Red,
+    onPrimary = Color.Black,
+    onSecondary = LightSmallTextColor,
+    onBackground = LightPrimaryTextColor,
+    onSurface = LightPrimaryTextColor,
+    onError = Color.White
 )
 
 @Composable
 fun GitHubViewerAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    useDarkIcons: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val systemUiController = rememberSystemUiController()
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    DisposableEffect(systemUiController, useDarkIcons) {
+        systemUiController.setSystemBarsColor(
+            color = Color.Transparent,
+            darkIcons = useDarkIcons,
+            isNavigationBarContrastEnforced = false
+        )
+
+        onDispose {}
     }
+    val statusBarColor = if (darkTheme) DarkBackgroundColor else LightBackgroundColor
+    val navigationBarColor = if (darkTheme) DarkBackgroundColor else LightBackgroundColor
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            window.statusBarColor = statusBarColor.toArgb()
+            window.navigationBarColor = navigationBarColor.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
         }
     }
-
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,

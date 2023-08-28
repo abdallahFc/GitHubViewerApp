@@ -18,5 +18,9 @@ interface GithubApiService {
     ): Response<RepoDetailsDto>
 
     @GET("/repos/{owner}/{repo}/issues")
-    suspend fun getIssues(): Response<List<IssueDto>>
+    suspend fun getIssues(
+        @Path("owner") owner: String,
+        @Path("repo") repo: String
+    ): Response<List<IssueDto>>
+
 }

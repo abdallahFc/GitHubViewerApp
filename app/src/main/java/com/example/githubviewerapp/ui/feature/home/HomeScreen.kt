@@ -1,17 +1,9 @@
 package com.example.githubviewerapp.ui.feature.home
 
-import android.util.Log
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.MaterialTheme.typography
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,7 +11,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.githubviewerapp.ui.composables.ApplicationScaffold
+import com.example.githubviewerapp.ui.composables.ContentVisibility
+import com.example.githubviewerapp.ui.composables.EmptyView
+import com.example.githubviewerapp.ui.composables.ShimmerLoading
 import com.example.githubviewerapp.ui.feature.details.navigateToDetailsScreen
+import com.example.githubviewerapp.ui.feature.home.composables.RepositoryItem
 import com.example.githubviewerapp.ui.navigation.LocalNavigationProvider
 
 @Composable
@@ -32,14 +29,13 @@ fun HomeScreen(
         viewModel.effect.collect { effect ->
             when (effect) {
                 is HomeUiEffect.NavigateToRepositoryDetails -> {
-                    navController.navigateToDetailsScreen(effect.owner,effect.repositoryName)
-                    Log.d("HomeScreen", "HomeScreen: NavigateToRepositoryDetails${effect.owner} ${effect.repositoryName}")
+                    navController.navigateToDetailsScreen(effect.owner, effect.repositoryName)
                 }
             }
         }
     }
-    Log.d("HomeScreen", "HomeScreen: $state")
     HomeContent(state, viewModel)
+
 }
 
 @Composable
@@ -47,52 +43,34 @@ fun HomeContent(
     state: HomeUiState,
     listener: HomeInteractionListener
 ) {
-    if (state.isLoading){
-        Text(text = "dsdsdsd")
-    }
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+    ApplicationScaffold(
+        textToShow = "Repositories"
     ) {
-        items(state.repositories.size) { index ->
-            RepositoryItem(state.repositories[index], onClick = {
-                listener.onClickRepositoryItem(
-                    state.repositories[index].user.userName,
-                    state.repositories[index].name
-                )
-            })
+        ShimmerLoading(state.isLoading)
+        EmptyView(state = state.emptyPlaceHolder())
+        ContentVisibility(state.contentScreen()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(vertical = 16.dp)
+
+            ) {
+                items(state.repositories.size) { index ->
+                    val repository = state.repositories[index]
+                    RepositoryItem(
+                        repositoryName = repository.name,
+                        repositoryDescription = repository.description,
+                        repositoryOwner = repository.user.userName,
+                        ownerAvatarUrl = repository.user.userAvatarUrl
+                    ) {
+                        listener.onClickRepositoryItem(
+                            repository.user.userName,
+                            repository.name
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
-@Composable
-fun RepositoryItem(repository: RepositoryUiModel, onClick: () -> Unit ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .clickable { onClick() },
-        elevation = 4.dp
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = repository.name,
-                style = typography.h6,
-                color = MaterialTheme.colors.primary
-            )
-            Spacer(modifier = Modifier.padding(4.dp))
-            Text(
-                text = repository.description,
-                style = typography.body1,
-                color = MaterialTheme.colors.onBackground
-            )
-            Spacer(modifier = Modifier.padding(8.dp))
-            Text(
-                text = "Owner: ${repository.user.userName}",
-                style = typography.caption,
-                color = MaterialTheme.colors.onBackground
-            )
-        }
-    }
-}

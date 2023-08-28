@@ -1,5 +1,4 @@
 package com.example.githubviewerapp.data.repo
-
 import com.example.githubviewerapp.data.source.local.RepositoryDao
 import com.example.githubviewerapp.data.source.local.entities.RepositoryEntity
 import com.example.githubviewerapp.data.source.local.mapper.toRepository
@@ -11,6 +10,11 @@ import com.example.githubviewerapp.domain.model.Issue
 import com.example.githubviewerapp.domain.model.Repository
 import com.example.githubviewerapp.domain.model.RepositoryDetails
 import com.example.githubviewerapp.domain.repo.GithubRepository
+import com.example.githubviewerapp.domain.util.EmptyResponseException
+import com.example.githubviewerapp.domain.util.NetworkErrorException
+import com.example.githubviewerapp.domain.util.ServerErrorException
+import com.example.githubviewerapp.domain.util.UnknownErrorException
+
 import retrofit2.Response
 import java.io.IOException
 import javax.inject.Inject
@@ -20,6 +24,7 @@ class GithubRepositoryImpl @Inject constructor(
     private val repositoryDao: RepositoryDao
 ) : GithubRepository {
 
+    // region getRepositories
     override suspend fun getRepositories(): List<Repository> {
         return try {
             val repositoriesFromApi = fetchRepositoriesFromApi()
@@ -31,7 +36,7 @@ class GithubRepositoryImpl @Inject constructor(
     }
 
     private suspend fun fetchRepositoriesFromApi(): List<RepositoryEntity> {
-        return wrapResponseWithErrorHandler {
+        return wrapResponse {
             githubApiService.getRepositories()
         }.map { it.toRepositoryEntity() }
     }
@@ -44,25 +49,30 @@ class GithubRepositoryImpl @Inject constructor(
     private suspend fun retrieveRepositoriesFromDb(): List<Repository> {
         return repositoryDao.getAllRepositories().map { it.toRepository() }
     }
+    // endregion
 
-
+    // region getRepositoryDetails
     override suspend fun getRepositoryDetails(owner: String, repo: String): RepositoryDetails {
-        return wrapResponseWithErrorHandler {
+        return wrapResponse {
             githubApiService.getRepositoryDetails(
                 owner, repo
             )
         }.toRepositoryDetails()
     }
+    // endregion
 
-    override suspend fun getIssues(): List<Issue> {
-        return wrapResponseWithErrorHandler {
-            githubApiService.getIssues()
+    // region getIssues
+    override suspend fun getIssues(owner: String, repo: String): List<Issue> {
+        return wrapResponse {
+            githubApiService.getIssues(owner, repo)
         }.map {
             it.toIssue()
         }
     }
 
-    private inline fun <reified T> wrapResponseWithErrorHandler(
+    // endregion
+
+    private inline fun <reified T> wrapResponse(
         function: () -> Response<T>
     ): T {
         try {
@@ -75,14 +85,21 @@ class GithubRepositoryImpl @Inject constructor(
                 if (errorBody != null) {
                     throw ServerErrorException(errorBody)
                 } else {
-                    throw ServerErrorException("Unknown server error")
+                    throw ServerErrorException(ERROR_UNKNOWN_SERVER)
                 }
             }
         } catch (e: IOException) {
-            throw NetworkErrorException("Network error: ${e.message}")
+            throw NetworkErrorException(ERROR_NETWORK)
         } catch (e: Exception) {
-            throw UnknownErrorException("An unexpected error occurred")
+            throw UnknownErrorException(ERROR_UNEXPECTED)
         }
+    }
+
+
+    companion object {
+        const val ERROR_UNKNOWN_SERVER = "server error"
+        const val ERROR_NETWORK = "No Internet Connection"
+        const val ERROR_UNEXPECTED = "An unexpected error occurred"
     }
 
 }
