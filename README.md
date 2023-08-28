@@ -1,4 +1,4 @@
-# GitHub Repo Viewer App
+# GitHub Viewer App
 
 The GitHub Repo Viewer App is an Android application developed using Kotlin and Jetpack Compose. This app allows users to view repositories from GitHub, showcasing various modern Android development practices and technologies.
 
