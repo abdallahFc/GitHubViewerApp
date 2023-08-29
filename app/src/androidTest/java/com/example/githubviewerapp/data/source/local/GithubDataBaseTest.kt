@@ -29,9 +29,9 @@ class GithubDataBaseTest {
     fun insertAndRetrieveRepositories() = runBlocking {
         val repositories = listOf(
             RepositoryEntity("1", "name1", "description1",
-                User("ds","sds","dsd")),
+                User("id","user","imageUrl")),
             RepositoryEntity("2", "name1", "description1",
-                User("ds","sds","dsd")),
+                User("id","user","imageUrl")),
         )
 
         repositoryDao.insertRepositories(repositories)
@@ -46,9 +46,9 @@ class GithubDataBaseTest {
     fun insertAndDeleteRepositories() = runBlocking {
         val repositories = listOf(
             RepositoryEntity("1", "name1", "description1",
-                User("ds","sds","dsd")),
+                User("id","user","imageUrl")),
             RepositoryEntity("2", "name1", "description1",
-                User("ds","sds","dsd")),
+                User("id","user","imageUrl")),
         )
 
         repositoryDao.insertRepositories(repositories)

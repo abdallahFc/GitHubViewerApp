@@ -15,7 +15,6 @@ data class HomeUiState(
     val error: ErrorHandler? = null,
     val isError: Boolean = false,
     val isEmpty: Boolean = false,
-    val items: Flow<PagingData<RepositoryUiModel>> = flow{},
 )
 data class RepositoryUiModel(
     val id: String = "",
