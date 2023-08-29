@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.githubviewerapp.ui.composables.ApplicationScaffold
 import com.example.githubviewerapp.ui.composables.ContentVisibility
-import com.example.githubviewerapp.ui.composables.NetworkError
+import com.example.githubviewerapp.ui.composables.EmptyView
 import com.example.githubviewerapp.ui.composables.ShimmerLoading
 import com.example.githubviewerapp.ui.feature.details.navigateToDetailsScreen
 import com.example.githubviewerapp.ui.feature.home.composables.RepositoryItem
@@ -47,7 +47,7 @@ fun HomeContent(
         textToShow = "Repositories"
     ) {
         ShimmerLoading(state.isLoading)
-        NetworkError(state = state.emptyPlaceHolder(), error = "No Internet found")
+        EmptyView(state = state.emptyPlaceHolder())
         ContentVisibility(state.contentScreen()) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
