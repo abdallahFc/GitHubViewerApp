@@ -12,9 +12,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.githubviewerapp.ui.composables.ApplicationScaffold
 import com.example.githubviewerapp.ui.composables.ContentVisibility
-import com.example.githubviewerapp.ui.composables.EmptyView
 import com.example.githubviewerapp.ui.composables.NetworkError
 import com.example.githubviewerapp.ui.composables.ShimmerLoading
+import com.example.githubviewerapp.ui.feature.home.emptyPlaceHolder
 import com.example.githubviewerapp.ui.feature.issue.composables.IssueItem
 
 @Composable
@@ -30,7 +30,7 @@ fun IssuesContent(
 ) {
     ApplicationScaffold(textToShow = "Issues") {
         ShimmerLoading(state = state.isLoading)
-        EmptyView(state = state.emptyPlaceHolder())
+        NetworkError(state = state.emptyPlaceHolder(), error = "No Internet found")
         NetworkError(state = state.isError, error = "ops, something went wrong")
         ContentVisibility(state = state.contentScreen()) {
             LazyColumn(
